@@ -21,6 +21,7 @@ const EMPTY_SEARCH: Partial<SavedSearch> = {
   contracts: ['CDI'],
   remote: 'any',
   salaryMin: null,
+  salaryMax: null,
   publishedSinceDays: 7,
   sources: [],
   romeCodes: [],
@@ -221,11 +222,17 @@ export class KdOffers extends LightElement {
           <div class="kd-field-label">Rayon : ${d.radiusKm ?? 30} km</div>
           <k3-slider min="0" max="150" step="5" .value=${d.radiusKm ?? 30} aria-label="Rayon" @k3-change=${(e: CustomEvent<{ value: number }>) => set({ radiusKm: e.detail.value })}></k3-slider>
         </div>
-        <div class="two" style="gap:.75rem">
+        <div>
           <k3-select variant="outlined" label="Publiées depuis" .value=${String(d.publishedSinceDays ?? 7)} @k3-change=${(e: Event) => set({ publishedSinceDays: Number(evValue(e)) })}>
             ${[1, 3, 7, 14, 31].map((n) => html`<k3-menu-item value=${n}>${n === 1 ? '24 h' : `${n} jours`}</k3-menu-item>`)}
           </k3-select>
-          <k3-text-field variant="outlined" type="number" label="Salaire min. (€/an)" .value=${d.salaryMin ? String(d.salaryMin) : ''} @k3-input=${(e: Event) => set({ salaryMin: Number(evValue(e)) || null })}></k3-text-field>
+        </div>
+      </div>
+      <div>
+        <div class="kd-field-label">Fourchette de salaire souhaitée (€ / an)</div>
+        <div class="two" style="gap:.75rem">
+          <k3-text-field variant="outlined" type="number" label="Minimum" .value=${d.salaryMin ? String(d.salaryMin) : ''} @k3-input=${(e: Event) => set({ salaryMin: Number(evValue(e)) || null })}>${slotIc('leading-icon', 'payments')}</k3-text-field>
+          <k3-text-field variant="outlined" type="number" label="Maximum" .value=${d.salaryMax ? String(d.salaryMax) : ''} @k3-input=${(e: Event) => set({ salaryMax: Number(evValue(e)) || null })}></k3-text-field>
         </div>
       </div>
       <div>
@@ -299,7 +306,7 @@ export class KdOffers extends LightElement {
               </div>
               ${this.live.offers.length
                 ? html`<div class="stack tight kd-stagger">${this.live.offers.map((o) => offerCard(o, this.handlers))}</div>`
-                : emptyState('search_off', 'Aucun résultat', 'Élargis le rayon, la période ou les contrats.')}`
+                : emptyState('search_off', 'Aucun résultat', 'Les offres doivent coller aux mots-clés. Élargis le rayon, la période, les contrats ou allège la requête.')}`
           : nothing}`;
   }
 

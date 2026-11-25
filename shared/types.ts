@@ -186,7 +186,10 @@ export interface SavedSearch {
   radiusKm: number;
   contracts: ContractType[];
   remote: 'any' | 'hybrid' | 'full';
+  /** Desired salary floor (€/year). */
   salaryMin: number | null;
+  /** Desired salary ceiling (€/year). */
+  salaryMax: number | null;
   publishedSinceDays: number;
   sources: SourceId[];
   romeCodes: string[];

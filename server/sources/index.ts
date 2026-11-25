@@ -2,7 +2,15 @@ import { normalize, scoreOffer } from '../../shared/analysis/index.js';
 import type { GeoPoint, NormalizedOffer, Profile, SourceId, SourceStatus } from '../../shared/types.js';
 import { dedupeKey } from '../repo/offers.js';
 import { adzuna, jooble, lba, remotive } from './aggregators.js';
-import { fetchJson, SourceError, type Connector, type SearchQuery } from './common.js';
+import {
+  fetchJson,
+  keywordRelevance,
+  offerMatchesKeywords,
+  offerMatchesSalary,
+  SourceError,
+  type Connector,
+  type SearchQuery,
+} from './common.js';
 import { franceTravail } from './france-travail.js';
 
 export type { SearchQuery } from './common.js';
@@ -55,6 +63,9 @@ export async function runSearch(q: SearchQuery, sources: SourceId[] | undefined,
     const key = dedupeKey(o.title, o.company);
     if (seen.has(key)) continue;
     seen.add(key);
+    // Keyword relevance first — sources often return loosely related ads.
+    if (q.keywords?.trim() && !offerMatchesKeywords(o, q.keywords)) continue;
+    if (!offerMatchesSalary(o, q.salaryMin, q.salaryMax)) continue;
     const title = normalize(`${o.title} ${o.company}`);
     if (excluded.some((k) => title.includes(k))) continue;
     const { analysis, match } = scoreOffer(o, profile);
@@ -63,7 +74,13 @@ export async function runSearch(q: SearchQuery, sources: SourceId[] | undefined,
     if (q.remote === 'hybrid' && remote !== 'full' && remote !== 'hybrid') continue;
     out.push({ ...o, contract: o.contract ?? analysis.contract, remote, matchScore: match.score, match });
   }
-  out.sort((a, b) => b.matchScore - a.matchScore);
+  // Title/keyword fit first, then profile match score.
+  out.sort((a, b) => {
+    const ka = keywordRelevance(a, q.keywords ?? '');
+    const kb = keywordRelevance(b, q.keywords ?? '');
+    if (kb !== ka) return kb - ka;
+    return b.matchScore - a.matchScore;
+  });
   return { offers: out, errors, counts };
 }
 

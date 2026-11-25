@@ -47,6 +47,7 @@ export const adzuna: Connector = {
       p.set('distance', String(q.radiusKm ?? 30));
     }
     if (q.salaryMin) p.set('salary_min', String(q.salaryMin));
+    if (q.salaryMax) p.set('salary_max', String(q.salaryMax));
     const c = q.contracts ?? [];
     if (c.length === 1 && c[0] === 'CDI') p.set('permanent', '1');
     else if (c.length && c.every((x) => x === 'CDD' || x === 'Freelance' || x === 'Intérim')) p.set('contract', '1');

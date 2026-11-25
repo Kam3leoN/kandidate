@@ -150,4 +150,9 @@ export const MIGRATIONS: Migration[] = [
       `insert into settings (id) values (1) on conflict do nothing`,
     ],
   },
+  {
+    version: 2,
+    name: 'searches_salary_max',
+    statements: [`alter table searches add column if not exists salary_max int`],
+  },
 ];

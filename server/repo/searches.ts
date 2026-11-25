@@ -15,6 +15,7 @@ export function mapSearch(r: Row): SavedSearch {
     contracts: r.contracts ?? [],
     remote: r.remote,
     salaryMin: r.salary_min ?? null,
+    salaryMax: r.salary_max ?? null,
     publishedSinceDays: r.published_since_days,
     sources: r.sources ?? [],
     romeCodes: r.rome_codes ?? [],
@@ -46,6 +47,7 @@ export function sanitizeSearch(input: Partial<SavedSearch>): Omit<SavedSearch, '
     contracts: arr(input.contracts).filter((c) => (CONTRACT_TYPES as string[]).includes(c)) as SavedSearch['contracts'],
     remote: input.remote === 'full' || input.remote === 'hybrid' ? input.remote : 'any',
     salaryMin: input.salaryMin ? Math.max(0, Math.round(Number(input.salaryMin))) : null,
+    salaryMax: input.salaryMax ? Math.max(0, Math.round(Number(input.salaryMax))) : null,
     publishedSinceDays: [1, 3, 7, 14, 31].includes(Number(input.publishedSinceDays)) ? Number(input.publishedSinceDays) : 7,
     sources: (arr(input.sources).filter((s) => (ALL_SOURCES as string[]).includes(s)) as SourceId[]).concat(),
     romeCodes: arr(input.romeCodes).map((c) => c.toUpperCase()).filter((c) => /^[A-N]\d{4}$/.test(c)),
@@ -70,11 +72,17 @@ export async function getSearch(id: number): Promise<SavedSearch> {
 export async function createSearch(input: Partial<SavedSearch>): Promise<SavedSearch> {
   const s = sanitizeSearch(input);
   if (!s.keywords && !s.romeCodes.length) throw new HttpError(400, 'Mots-clés ou codes ROME requis');
+  // Keep range coherent: if both set and inverted, swap.
+  if (s.salaryMin != null && s.salaryMax != null && s.salaryMin > s.salaryMax) {
+    const tmp = s.salaryMin;
+    s.salaryMin = s.salaryMax;
+    s.salaryMax = tmp;
+  }
   const d = await db();
   const [r] = await d.query(
-    `insert into searches (name, keywords, location, radius_km, contracts, remote, salary_min, published_since_days, sources, rome_codes, exclude_keywords, min_score, alert)
-     values ($1,$2,$3::jsonb,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) returning *`,
-    [s.name, s.keywords, s.location ? JSON.stringify(s.location) : null, s.radiusKm, s.contracts, s.remote, s.salaryMin, s.publishedSinceDays, s.sources, s.romeCodes, s.excludeKeywords, s.minScore, s.alert],
+    `insert into searches (name, keywords, location, radius_km, contracts, remote, salary_min, salary_max, published_since_days, sources, rome_codes, exclude_keywords, min_score, alert)
+     values ($1,$2,$3::jsonb,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) returning *`,
+    [s.name, s.keywords, s.location ? JSON.stringify(s.location) : null, s.radiusKm, s.contracts, s.remote, s.salaryMin, s.salaryMax, s.publishedSinceDays, s.sources, s.romeCodes, s.excludeKeywords, s.minScore, s.alert],
   );
   return mapSearch(r);
 }
@@ -82,10 +90,15 @@ export async function createSearch(input: Partial<SavedSearch>): Promise<SavedSe
 export async function updateSearch(id: number, input: Partial<SavedSearch>): Promise<SavedSearch> {
   const current = await getSearch(id);
   const s = sanitizeSearch({ ...current, ...input });
+  if (s.salaryMin != null && s.salaryMax != null && s.salaryMin > s.salaryMax) {
+    const tmp = s.salaryMin;
+    s.salaryMin = s.salaryMax;
+    s.salaryMax = tmp;
+  }
   const d = await db();
   const [r] = await d.query(
-    `update searches set name=$1, keywords=$2, location=$3::jsonb, radius_km=$4, contracts=$5, remote=$6, salary_min=$7, published_since_days=$8, sources=$9, rome_codes=$10, exclude_keywords=$11, min_score=$12, alert=$13 where id=$14 returning *`,
-    [s.name, s.keywords, s.location ? JSON.stringify(s.location) : null, s.radiusKm, s.contracts, s.remote, s.salaryMin, s.publishedSinceDays, s.sources, s.romeCodes, s.excludeKeywords, s.minScore, s.alert, id],
+    `update searches set name=$1, keywords=$2, location=$3::jsonb, radius_km=$4, contracts=$5, remote=$6, salary_min=$7, salary_max=$8, published_since_days=$9, sources=$10, rome_codes=$11, exclude_keywords=$12, min_score=$13, alert=$14 where id=$15 returning *`,
+    [s.name, s.keywords, s.location ? JSON.stringify(s.location) : null, s.radiusKm, s.contracts, s.remote, s.salaryMin, s.salaryMax, s.publishedSinceDays, s.sources, s.romeCodes, s.excludeKeywords, s.minScore, s.alert, id],
   );
   return mapSearch(r);
 }

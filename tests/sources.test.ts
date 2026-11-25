@@ -5,6 +5,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { adzuna, jooble, lba, remotive } from '../server/sources/aggregators.js';
 import { franceTravail } from '../server/sources/france-travail.js';
 import { parseAlertEmail } from '../server/importers/email-alert.js';
+import {
+  keywordTerms,
+  offerMatchesKeywords,
+  offerMatchesSalary,
+} from '../server/sources/common.js';
+import { runSearch } from '../server/sources/index.js';
+import { EMPTY_PROFILE } from '../shared/types.js';
 
 type Call = { url: string; init?: RequestInit };
 
@@ -140,6 +147,50 @@ describe('Remotive', () => {
     const r = await remotive.search({ keywords: 'frontend' });
     expect(r.map((o) => o.sourceId)).toEqual(['1']);
     expect(r[0]).toMatchObject({ remote: 'full', contract: 'Freelance' });
+  });
+});
+
+describe('keywordTerms & relevance', () => {
+  it('drops French stopwords and keeps phrases from commas', () => {
+    expect(keywordTerms('chef de projet')).toEqual(['chef', 'projet']);
+    expect(keywordTerms('react, vue')).toEqual(['react', 'vue']);
+    expect(keywordTerms('développeur front')).toEqual(['développeur', 'front']);
+  });
+
+  it('requires keywords in title/description (not just profile score)', () => {
+    const ok = { title: 'Développeur Front-End React', company: 'Acme', description: 'TypeScript' };
+    const bad = { title: 'Comptable senior', company: 'Acme', description: 'Excel et SAP' };
+    expect(offerMatchesKeywords(ok, 'développeur react')).toBe(true);
+    expect(offerMatchesKeywords(bad, 'développeur react')).toBe(false);
+    expect(offerMatchesKeywords(ok, 'front-end')).toBe(true);
+  });
+
+  it('filters salary range when the offer band is known', () => {
+    expect(offerMatchesSalary({ salaryMin: 50000, salaryMax: 60000 }, 40000, 70000)).toBe(true);
+    expect(offerMatchesSalary({ salaryMin: 80000, salaryMax: 90000 }, 40000, 70000)).toBe(false);
+    expect(offerMatchesSalary({ salaryMin: 30000, salaryMax: 35000 }, 40000, null)).toBe(false);
+    expect(offerMatchesSalary({ salaryMin: null, salaryMax: null }, 40000, 70000)).toBe(true);
+  });
+});
+
+describe('runSearch keyword filter', () => {
+  it('drops offers that ignore the query even if other sources return them', async () => {
+    vi.stubEnv('ADZUNA_APP_ID', 'a');
+    vi.stubEnv('ADZUNA_APP_KEY', 'b');
+    vi.stubEnv('REMOTIVE_DISABLED', '1');
+    mockFetch([
+      [
+        /api\.adzuna\.com/,
+        {
+          results: [
+            { id: '1', title: 'Développeur React', description: 'React', created: '2026-11-21T08:00:00Z', redirect_url: 'https://adzuna/1', company: { display_name: 'Good' }, location: { display_name: 'Lyon' }, salary_min: 45000, salary_max: 55000, salary_is_predicted: '0' },
+            { id: '2', title: 'Aide-comptable', description: 'Paie', created: '2026-11-21T08:00:00Z', redirect_url: 'https://adzuna/2', company: { display_name: 'Bad' }, location: { display_name: 'Lyon' } },
+          ],
+        },
+      ],
+    ]);
+    const r = await runSearch({ keywords: 'développeur react', salaryMin: 40000, salaryMax: 70000, limit: 20 }, ['adzuna'], EMPTY_PROFILE);
+    expect(r.offers.map((o) => o.title)).toEqual(['Développeur React']);
   });
 });
 

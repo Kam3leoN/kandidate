@@ -35,6 +35,7 @@ export async function runSavedSearch(s: SavedSearch, profile: Profile, settings:
       contracts: s.contracts,
       remote: s.remote,
       salaryMin: s.salaryMin,
+      salaryMax: s.salaryMax,
       publishedSinceDays: s.publishedSinceDays,
       romeCodes: s.romeCodes,
       excludeKeywords: [...s.excludeKeywords, ...profile.excludedKeywords],
