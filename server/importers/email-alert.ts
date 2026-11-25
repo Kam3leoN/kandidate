@@ -153,7 +153,14 @@ export function parseAlertEmail(input: { html?: string | null; text?: string | n
         idx = i;
         break;
       }
-      if (idx < 0) idx = near.findLastIndex((l) => l.length >= 6 && !PLACE.test(normalize(l)));
+      if (idx < 0) {
+        for (let i = near.length - 1; i >= 0; i--) {
+          if (near[i].length >= 6 && !PLACE.test(normalize(near[i]))) {
+            idx = i;
+            break;
+          }
+        }
+      }
       if (idx < 0) continue;
       text = near[idx];
       ctaContext = near.slice(idx + 1);
