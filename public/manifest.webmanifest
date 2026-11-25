@@ -1,0 +1,22 @@
+{
+  "name": "KandiDate",
+  "short_name": "KandiDate",
+  "description": "Suivi de candidatures, relances, veille d'offres et analyse de match.",
+  "lang": "fr",
+  "start_url": "/#/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FEF7FF",
+  "theme_color": "#6750A4",
+  "icons": [
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Analyser une annonce", "url": "/#/analyze" },
+    { "name": "Mes candidatures", "url": "/#/applications" },
+    { "name": "Offres", "url": "/#/offers" }
+  ]
+}

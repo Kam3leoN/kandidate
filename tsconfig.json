@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker.ImportScripts"],
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@k3ui/*": ["./vendor/k3ui/src/*"],
+      "@k3ux/*": ["./vendor/k3ux/src/*"],
+      "k3ui": ["./vendor/k3ui/src/lazy.ts"]
+    },
+    "types": ["vite/client"]
+  },
+  "include": ["src", "shared"]
+}

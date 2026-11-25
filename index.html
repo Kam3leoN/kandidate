@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr" data-k3-booting>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>KandiDate — tes candidatures, en mode expressif</title>
+    <meta name="description" content="Suivi de candidatures, relances, veille d'offres multi-sources et analyse de match avec ton profil." />
+    <meta name="theme-color" content="#6750A4" />
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Material Symbols subset: names collected from the sources at build time (vite.config.ts) -->
+    <link rel="stylesheet" href="%MATERIAL_SYMBOLS_URL%" />
+    <script>
+      window.K3UI_MANUAL = true;
+      /* Pre-paint: last theme + navigation mode, avoids a flash before the app boots. */
+      (function () {
+        try {
+          var t = JSON.parse(localStorage.getItem('kd.theme') || 'null');
+          var dark = t && t.mode === 'dark' ? true : t && t.mode === 'light' ? false : matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.dataset.kdDark = dark ? '1' : '0';
+          if (t && t.vars) for (var k in t.vars) document.documentElement.style.setProperty(k, t.vars[k]);
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      html[data-k3-booting] body { background: var(--k3-sys-color-surface, #fef7ff); }
+      html[data-kd-dark='1'][data-k3-booting] body { background: #141218; }
+      #boot { position: fixed; inset: 0; display: grid; place-items: center; z-index: 9999; transition: opacity 300ms; }
+      #boot svg { width: 72px; height: 72px; animation: kd-boot 1.4s cubic-bezier(.38,1.21,.22,1) infinite; }
+      @keyframes kd-boot { 0% { transform: rotate(0) scale(.9) } 50% { transform: rotate(180deg) scale(1.05) } 100% { transform: rotate(360deg) scale(.9) } }
+      html:not([data-k3-booting]) #boot { opacity: 0; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div id="boot" aria-hidden="true">
+      <svg viewBox="0 0 1 1"><path fill="var(--k3-sys-color-primary, #6750A4)" d="M0.5 0.02C0.62 0.02 0.64 0.12 0.74 0.16C0.84 0.2 0.94 0.14 0.98 0.26C1.02 0.38 0.92 0.42 0.92 0.5C0.92 0.58 1.02 0.62 0.98 0.74C0.94 0.86 0.84 0.8 0.74 0.84C0.64 0.88 0.62 0.98 0.5 0.98C0.38 0.98 0.36 0.88 0.26 0.84C0.16 0.8 0.06 0.86 0.02 0.74C-0.02 0.62 0.08 0.58 0.08 0.5C0.08 0.42 -0.02 0.38 0.02 0.26C0.06 0.14 0.16 0.2 0.26 0.16C0.36 0.12 0.38 0.02 0.5 0.02Z"/></svg>
+    </div>
+    <kd-app></kd-app>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

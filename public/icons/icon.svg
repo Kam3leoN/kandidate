@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="128" fill="#EADDFF"/>
+  <g transform="translate(56 56) scale(400)">
+    <path fill="#6750A4" d="M0.5 0.02C0.62 0.02 0.64 0.12 0.74 0.16C0.84 0.2 0.94 0.14 0.98 0.26C1.02 0.38 0.92 0.42 0.92 0.5C0.92 0.58 1.02 0.62 0.98 0.74C0.94 0.86 0.84 0.8 0.74 0.84C0.64 0.88 0.62 0.98 0.5 0.98C0.38 0.98 0.36 0.88 0.26 0.84C0.16 0.8 0.06 0.86 0.02 0.74C-0.02 0.62 0.08 0.58 0.08 0.5C0.08 0.42 -0.02 0.38 0.02 0.26C0.06 0.14 0.16 0.2 0.26 0.16C0.36 0.12 0.38 0.02 0.5 0.02Z"/>
+  </g>
+  <text x="256" y="330" text-anchor="middle" font-family="Google Sans, Roboto, Arial, sans-serif" font-weight="800" font-size="230" fill="#FFFFFF">K</text>
+</svg>

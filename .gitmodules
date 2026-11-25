@@ -1,0 +1,6 @@
+[submodule "vendor/k3ui"]
+	path = vendor/k3ui
+	url = https://github.com/Kam3leoN/k3ui-expressive.git
+[submodule "vendor/k3ux"]
+	path = vendor/k3ux
+	url = https://github.com/Kam3leoN/k3ux-expressive.git
